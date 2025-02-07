@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useResizeTextarea } from "@/hooks/use-resize-textarea";
@@ -12,61 +12,39 @@ interface AIInputWithLoadingProps {
   maxHeight?: number;
   loadingDuration?: number;
   thinkingDuration?: number;
-  onSubmit?: (value: string) => void | Promise<void>;
+  onSubmit: (value: string) => void | Promise<void>;  // simplified prop type
   className?: string;
   autoAnimate?: boolean;
 }
 
 export function InputField({
-  id = "ai-input-with-loading",
-  placeholder = "Ask me anything!",
+  id = "ai-input",
+  placeholder = "What table can I create for you?",
   minHeight = 56,
   maxHeight = 200,
-  loadingDuration = 3000,
-  thinkingDuration = 1000,
   onSubmit,
   className,
-  autoAnimate = false
+  autoAnimate = false,
 }: AIInputWithLoadingProps) {
   const [inputValue, setInputValue] = useState("");
   const [submitted, setSubmitted] = useState(autoAnimate);
-  const [isAnimating, setIsAnimating] = useState(autoAnimate);
-  
+
   const { textareaRef, adjustHeight } = useResizeTextarea({
     minHeight,
     maxHeight,
   });
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    const runAnimation = () => {
-      if (!isAnimating) return;
-      setSubmitted(true);
-      timeoutId = setTimeout(() => {
-        setSubmitted(false);
-        timeoutId = setTimeout(runAnimation, thinkingDuration);
-      }, loadingDuration);
-    };
-
-    if (isAnimating) {
-      runAnimation();
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [isAnimating, loadingDuration, thinkingDuration]);
-
   const handleSubmit = async () => {
     if (!inputValue.trim() || submitted) return;
-    
+
     setSubmitted(true);
-    await onSubmit?.(inputValue);
+    await onSubmit(inputValue.trim());
     setInputValue("");
     adjustHeight(true);
-    
+
     setTimeout(() => {
       setSubmitted(false);
-    }, loadingDuration);
+    });
   };
 
   return (
@@ -77,10 +55,8 @@ export function InputField({
             id={id}
             placeholder={placeholder}
             className={cn(
-              "max-w-xl bg-black/5 dark:bg-white/5 w-full rounded-3xl pl-6 pr-10 py-4",
-              "placeholder:text-black/70 dark:placeholder:text-white/70",
-              "border-none ring-black/30 dark:ring-white/30",
-              "text-black dark:text-white resize-none text-wrap leading-[1.2]",
+              "max-w-xl w-full rounded-3xl pl-6 pr-10 py-4",
+              "resize-none text-wrap leading-[1.2]",
               `min-h-[${minHeight}px]`
             )}
             ref={textareaRef}
@@ -89,13 +65,13 @@ export function InputField({
               setInputValue(e.target.value);
               adjustHeight();
             }}
+            disabled={submitted}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSubmit();
               }
             }}
-            disabled={submitted}
           />
           <button
             onClick={handleSubmit}
@@ -112,7 +88,7 @@ export function InputField({
                 style={{ animationDuration: "3s" }}
               />
             ) : (
-                <span
+              <span
                 className={cn(
                   "material-symbols-rounded transition-opacity",
                   inputValue ? "opacity-100" : "opacity-30"
@@ -123,10 +99,10 @@ export function InputField({
             )}
           </button>
         </div>
-        <p className="pl-4 h-4 text-xs mx-auto text-black/70 dark:text-white/70">
-          {submitted ? "AI is thinking..." : "Ready to submit!"}
-        </p>
       </div>
+      <p className="pl-4 h-4 text-xs mx-auto text-black/70 dark:text-white/70">
+        {submitted ? "AI is thinking..." : "Ready to submit!"}
+      </p>
     </div>
   );
 }
