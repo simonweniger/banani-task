@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import openai from '@/lib/openai';
 import { createMessageContentSchema, type Message } from '@/types/messages';
-import { TableStyleSchema } from '@/types/table';
-import { iconNames } from '@/types/table';
+import { iconNames, TableStyleSchema } from '@/types/table';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 interface GenerateRequest {
@@ -22,23 +21,23 @@ export async function POST(request: Request) {
   // since we just wanna create a table in this exercise we hard code the TableDesignSchema as a response format
   const MessageContentSchema = createMessageContentSchema(TableStyleSchema);
   const jsonSchema = zodToJsonSchema(MessageContentSchema, 'messageContent');
-  const systemMessage = `You are an experienced senior designer. Create tables with Material Icons.
-            Use icons appropriately to enhance the table's usability and visual appeal.
+  const systemMessage = `You are an experienced senior designer. Create a table based on the users request. Stricktly follow their requirements.
+            Available icons: ${iconNames.join(', ')}.
+
+            STRICT REQUIREMENTS:
+            1. ONLY use icon names from the list above. Any other icon names will cause an error.
+            2. Double-check that each icon name matches EXACTLY with one from the list.
+            3. Do not attempt to use similar or alternative icon names.
+
             Icons can be placed before or after text in cells.
+            You can style icons with additional classes for color and size.
 
-            Example cell with icon:
-            {
-              "content": {
-                "text": "User Profile",
-                "icon": {
-                  "name": "person",
-                  "position": "before",
-                  "className": "icon-primary"
-                }
-              }
-            }
-
-            Example Json response:
+            Style the table based on the request from the user. Remember that you can make it bordered and change the border radius.
+            
+            IMPORTANT: FOLLOW THE USER INSTRUCTIONS AND USE THE REQUESTED AMOUNT OF ROWS AND COLUMNS!
+            Only use icon names from the provided list above. Do not use any other icon names.
+            
+            Here is a example Json response:
             ---
             {
               title: "Employee Directory",
@@ -154,14 +153,10 @@ export async function POST(request: Request) {
 
             ---
 
-            Make sure your Response must follow this JSON schema:
+            Your Response must follow this JSON schema:
             ${JSON.stringify(jsonSchema, null, 2)}
             
-            ---
-
-            IMPORTANT: FOLLOW THE USER INSTRUCTIONS AND USE THE REQUESTED AMOUNT OF ROWS AND COLUMNS!
-            Only use icon names from the provided list above. Do not use any other icon names.
-            `
+            `;
 
   console.log("system Message", systemMessage)
 
@@ -178,7 +173,7 @@ export async function POST(request: Request) {
           messages: [
             {
               role: "system",
-              content: systemMessage + (attempt > 0 ? "\n\nPrevious attempt failed validation. Please ensure the response strictly follows the schema." : "")
+              content: systemMessage + (attempt > 0 ? "\n\nPrevious attempt failed validation. Please ensure the response strictly follows the schema and the user request!" : "")
             },
             ...newMessages.map(msg => ({
               role: msg.role,
@@ -193,7 +188,7 @@ export async function POST(request: Request) {
         const parsedContent = JSON.parse(responseContent || "{}");
 
         const validatedDesign = TableStyleSchema.parse(parsedContent.design);
-        
+
         result = {
           role: "assistant",
           content: {
@@ -215,9 +210,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ result });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ 
-      error: "Failed to generate valid response", 
-      details: error instanceof Error ? error.message : "Unknown error" 
+    return NextResponse.json({
+      error: "Failed to generate valid response",
+      details: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
 }
