@@ -3,7 +3,6 @@ import openai from '@/lib/openai';
 import { createMessageContentSchema, type Message } from '@/types/messages';
 import { iconNames, TableStyleSchema } from '@/types/table';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import ChatCompletionCreateParamsNonStreaming from "openai"
 
 interface GenerateRequest {
   messages: Message[];
