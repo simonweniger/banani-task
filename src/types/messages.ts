@@ -1,9 +1,12 @@
 import { z } from "zod";
 
-export const MessageContentSchema = z.object({
-    design: z.string(),
+// here i create an extendable zod schema so we can pass in any zod schmema as a content
+export const createMessageContentSchema = <T extends z.ZodTypeAny>(designSchema: T) => z.object({
+    design: designSchema.optional(),
     message: z.string(),
 }).required();
+
+export const MessageContentSchema = createMessageContentSchema(z.any());
 
 export const MessageSchema = z.object({
   role: z.enum(["system", "user", "assistant"]),

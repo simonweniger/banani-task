@@ -1,3 +1,5 @@
+// THIS HOOK IS BUILD WITH AI
+
 import { useEffect, useRef, useCallback } from "react";
 
 interface UseAutoResizeTextareaProps {
