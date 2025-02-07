@@ -3,6 +3,7 @@ import openai from '@/lib/openai';
 import { createMessageContentSchema, type Message } from '@/types/messages';
 import { iconNames, TableStyleSchema } from '@/types/table';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import ChatCompletionCreateParamsNonStreaming from "openai"
 
 interface GenerateRequest {
   messages: Message[];
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
             
             Here is a example Json response:
             ---
-            {
+             {
               title: "Employee Directory",
               bordered: true,
               borderRadius: "lg",
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
                     content: {
                       text: "Department",
                       icon: {
-                        name: "business",
+                        name: "category",
                         position: "before",
                         className: "text-gray-600"
                       }
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
                       content: {
                         text: "Active",
                         icon: {
-                          name: "check_circle",
+                          name: "check",
                           position: "after",
                           className: "text-green-600"
                         }
@@ -147,6 +148,105 @@ export async function POST(request: Request) {
                       }
                     }
                   ]
+                },
+                {
+                  className: "hover:bg-gray-50",
+                  cells: [
+                    {
+                      className: "font-medium",
+                      content: {
+                        text: "Mike Johnson",
+                        icon: {
+                          name: "account_circle",
+                          position: "before",
+                          className: "text-blue-400"
+                        }
+                      }
+                    },
+                    {
+                      className: "",
+                      content: {
+                        text: "Marketing"
+                      }
+                    },
+                    {
+                      className: "text-green-600",
+                      content: {
+                        text: "Active",
+                        icon: {
+                          name: "check",
+                          position: "after",
+                          className: "text-green-600"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  className: "hover:bg-gray-50",
+                  cells: [
+                    {
+                      className: "font-medium",
+                      content: {
+                        text: "Sarah Wilson",
+                        icon: {
+                          name: "account_circle",
+                          position: "before",
+                          className: "text-blue-400"
+                        }
+                      }
+                    },
+                    {
+                      className: "",
+                      content: {
+                        text: "Sales"
+                      }
+                    },
+                    {
+                      className: "text-red-600",
+                      content: {
+                        text: "Offline",
+                        icon: {
+                          name: "close",
+                          position: "after",
+                          className: "text-red-600"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  className: "hover:bg-gray-50",
+                  cells: [
+                    {
+                      className: "font-medium",
+                      content: {
+                        text: "Alex Brown",
+                        icon: {
+                          name: "account_circle",
+                          position: "before",
+                          className: "text-blue-400"
+                        }
+                      }
+                    },
+                    {
+                      className: "",
+                      content: {
+                        text: "Support"
+                      }
+                    },
+                    {
+                      className: "text-green-600",
+                      content: {
+                        text: "Active",
+                        icon: {
+                          name: "check",
+                          position: "after",
+                          className: "text-green-600"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             };
@@ -157,8 +257,6 @@ export async function POST(request: Request) {
             ${JSON.stringify(jsonSchema, null, 2)}
             
             `;
-
-  console.log("system Message", systemMessage)
 
   try {
     const maxRetries = 3;

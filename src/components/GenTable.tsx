@@ -47,7 +47,7 @@ export default function GenTable({ tableProps }: GenTableProps) {
       </Label>
       <Table
         className={cn(
-          tableProps.borderRadius ? `rounded-${tableProps.borderRadius}` : "",
+          tableProps.borderRadius ? `rounded-${tableProps.borderRadius}` : " rounded-md",
           tableProps.bordered ? "border" : "border-none"
         )}
       >
